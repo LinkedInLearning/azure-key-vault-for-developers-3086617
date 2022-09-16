@@ -15,17 +15,13 @@ namespace FilePortal.SecureVault
 
     public class VaultService : IVaultService
     {
-        private readonly string _vaultClientId;
-        private readonly string _tenantId;
-        private readonly string _vaultClientSecret;
+       
         private readonly string _vaultUrl;
         private readonly SecretClient _secretClient;
 
         public VaultService(VaultConfiguration config)
         {
-            _tenantId = config.TenantId;
-            _vaultClientId = config.ClientId;
-            _vaultClientSecret = config.ClientSecret;
+          
             _vaultUrl = config.Endpoint;
             _secretClient = new SecretClient(new Uri(_vaultUrl), GetCredentials());
 
@@ -62,9 +58,9 @@ namespace FilePortal.SecureVault
 
         #region private
 
-        private ClientSecretCredential GetCredentials()
+        private DefaultAzureCredential GetCredentials()
         {
-            var cred = new ClientSecretCredential(_tenantId, _vaultClientId, _vaultClientSecret);
+            var cred = new DefaultAzureCredential();
             return cred;
         }
         #endregion

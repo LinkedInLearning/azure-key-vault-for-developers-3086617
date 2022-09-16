@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var vaultConfig = builder.Configuration.GetSection("KeyVault").Get<VaultConfiguration>();
 
-builder.Configuration.AddAzureKeyVault(new Uri(vaultConfig.Endpoint), new ClientSecretCredential(vaultConfig.TenantId,vaultConfig.ClientId,vaultConfig.ClientSecret));
+builder.Configuration.AddAzureKeyVault(new Uri(vaultConfig.Endpoint),new DefaultAzureCredential());
 
 // Add DB
 var dbConenctionString = builder.Configuration.GetConnectionString("PotalAppDBConnectionString");
