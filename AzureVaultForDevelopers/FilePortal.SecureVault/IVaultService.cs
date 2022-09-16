@@ -9,6 +9,7 @@ using Microsoft.Azure.KeyVault;
 using System;
 using System.Net;
 using System.Text;
+using static Microsoft.Azure.KeyVault.WebKey.JsonWebKeyVerifier;
 
 namespace FilePortal.SecureVault
 {
@@ -41,8 +42,11 @@ namespace FilePortal.SecureVault
                            MaxDelay = TimeSpan.FromSeconds(16),
                            MaxRetries = 5,
                            Mode = RetryMode.Exponential
-                        }
+                }
               };
+           // https://github.com/azure/azure-sdk-for-net/tree/main/sdk/keyvault/samples/keyvaultproxy/src
+            secretOptions.AddPolicy(new KeyVaultProxy(TimeSpan.FromSeconds(30)), HttpPipelinePosition.PerCall);
+
             _secretClient = new SecretClient(new Uri(_vaultUrl), GetCredentials(), secretOptions);
             KeyClientOptions keyOptions = new KeyClientOptions
             {
@@ -54,6 +58,7 @@ namespace FilePortal.SecureVault
                            Mode = RetryMode.Exponential
                 }
             };
+            keyOptions.AddPolicy(new KeyVaultProxy(TimeSpan.FromSeconds(30)), HttpPipelinePosition.PerCall);
             _keyClient = new KeyClient(new Uri(_vaultUrl), GetCredentials(), keyOptions);
 
         }
