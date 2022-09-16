@@ -1,0 +1,50 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <a asp-page="/uploadfile" class="text-center text-white">
+            <div class=" card shadow-lg rounded border text-white text-center bg-success d-inline-block invoice-card">
+                <div class="card-body">
+                    <i class="fa fa-file" aria-hidden="true"></i>
+                    <h5 class="card-title">Upload File</h5>
+
+                </div>
+        </a>
+    </div>
+</div>
+
+<div class="row mt-2">
+
+  <div class="col-12">
+        <div class="card-group">
+        @foreach (var item in Model.Files)
+        {
+
+                <div class=" card  shadow rounded border invoice-card m-1 file-card" >
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@item.CreatedOn</h6>
+                        @if(item.IsStoredExternaly){
+                            <h7 class="card-text d-block"> Stored Externaly on: @item.ExternalSourceName</h7>
+                        }
+
+                        <a asp-page="/DownloadFile" class="card-link" target="_blank" asp-route-id="@item.Id">Download File</a>
+                    </div>
+                </div>
+          
+
+        }
+        </div>
+  </div>
+</div>
+<style>
+    .file-card{
+        min-width: 200px;
+       width: 200px;
+    }
+</style>

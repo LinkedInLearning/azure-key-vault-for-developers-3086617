@@ -1,0 +1,28 @@
+﻿@page
+@model UploadFileModel
+@{
+    ViewData["Title"] = "Upload File";
+}
+
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Upload file</h5>
+    <p class="card-text">Select a file and click the upload button
+
+            <form method="post" enctype="multipart/form-data">
+                <input type="file" class="form-control" required asp-for="Upload" />
+                <label asp-for="CustomSourceId" class="control-label"></label>
+                <select asp-for="CustomSourceId" class="form-control">
+                    <option value="">Choose custom source</option>
+                    
+                    @foreach (var item in Model.Sources)
+                {
+                        <option value="@item.Id">@item.Name (@item.ContainerName)</option>
+                }
+                  
+                </select>
+                <input type="submit" class="btn btn-primary mt-2" value="Upload" />
+            </form>
+  </div>
+</div>
