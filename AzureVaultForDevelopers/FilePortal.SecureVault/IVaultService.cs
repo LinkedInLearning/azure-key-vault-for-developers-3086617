@@ -25,7 +25,6 @@ namespace FilePortal.SecureVault
         private readonly SecretClient _secretClient;
         private readonly KeyClient _keyClient;
         private readonly string _keyName = "EncryptionDemo";
-
         public VaultService(VaultConfiguration config)
         {
           

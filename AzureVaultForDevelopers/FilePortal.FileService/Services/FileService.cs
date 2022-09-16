@@ -100,6 +100,7 @@ namespace FilePortal.FileService.Services
         }
         public async Task CreateCustomSource (NewCustomSource data, string userId)
         {
+            var connectionStringEncrypted = await _vault.Encrypt(data.StorageConnectionString);
            var newSource= _db.ExternalFileSource.Add(new ExternalFileSource
             {
                 Id = Guid.NewGuid(),
@@ -107,11 +108,8 @@ namespace FilePortal.FileService.Services
                 Description = data.Description,
                 Name = data.Name,
                 UserId = userId,
-                ConnectionStringKey = "ClientSecret-Storage-" + Guid.NewGuid()
-            }).Entity;
-
-            await _vault.CreateSecret(newSource.ConnectionStringKey, data.StorageConnectionString);
-
+                ConnectionStringKey = connectionStringEncrypted
+           }).Entity;
             _db.SaveChanges();
 
            
@@ -134,10 +132,12 @@ namespace FilePortal.FileService.Services
             }
             else
             {
-               
-                var connectionString = await _vault.GetSecret(externalSource.ConnectionStringKey);
+                //Good practice: Add inmemory caching to avoid calling the decrypt api. Its slow and expensive
+                var connectionStringDecrypted = await _vault.Decrypt(externalSource.ConnectionStringKey);
+
+
                 // Create a BlobServiceClient object which will be used to create a container client
-                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionStringDecrypted);
                 // Create the container and return a container client object
                 var blobContainer = blobServiceClient.GetBlobContainerClient(externalSource.ContainerName);
                 //create container if it doesn't exist
