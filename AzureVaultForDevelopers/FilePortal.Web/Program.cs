@@ -4,10 +4,13 @@ using FilePortal.Dal.Model;
 using FilePortal.FileService.Config;
 using FilePortal.SecureVault.Config;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var vaultConfig = builder.Configuration.GetSection("KeyVault").Get<VaultConfiguration>();
 
+builder.Configuration.AddAzureKeyVault(new Uri(vaultConfig.Endpoint), new ClientSecretCredential(vaultConfig.TenantId,vaultConfig.ClientId,vaultConfig.ClientSecret));
 
 // Add DB
 var dbConenctionString = builder.Configuration.GetConnectionString("PotalAppDBConnectionString");
