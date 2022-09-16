@@ -109,8 +109,9 @@ namespace FilePortal.FileService.Services
                 UserId = userId,
                 ConnectionStringKey = "ClientSecret-Storage-" + Guid.NewGuid()
             }).Entity;
-            //TODO add key to vault
-            throw new NotImplementedException();
+
+            await _vault.CreateSecret(newSource.ConnectionStringKey, data.StorageConnectionString);
+
             _db.SaveChanges();
 
            
@@ -133,8 +134,14 @@ namespace FilePortal.FileService.Services
             }
             else
             {
-                //TODO add logic for getting connection string from azure key vault
-                throw new NotImplementedException();
+                var connectionString = await _vault.GetSecret(externalSource.ConnectionStringKey);
+                // Create a BlobServiceClient object which will be used to create a container client
+                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+                // Create the container and return a container client object
+                var blobContainer = blobServiceClient.GetBlobContainerClient(externalSource.ContainerName);
+                //create container if it doesn't exist
+                await blobContainer.CreateIfNotExistsAsync();
+                return blobContainer;
             }
         }
         #endregion
