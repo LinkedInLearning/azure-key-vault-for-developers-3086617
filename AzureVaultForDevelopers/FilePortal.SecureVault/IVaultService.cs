@@ -1,4 +1,5 @@
 ﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using FilePortal.SecureVault.Config;
 using System;
 
@@ -18,7 +19,7 @@ namespace FilePortal.SecureVault
         private readonly string _tenantId;
         private readonly string _vaultClientSecret;
         private readonly string _vaultUrl;
-
+        private readonly SecretClient _secretClient;
 
         public VaultService(VaultConfiguration config)
         {
@@ -26,7 +27,8 @@ namespace FilePortal.SecureVault
             _vaultClientId = config.ClientId;
             _vaultClientSecret = config.ClientSecret;
             _vaultUrl = config.Endpoint;
-            
+            _secretClient = new SecretClient(new Uri(_vaultUrl), GetCredentials());
+
         }
 
 
@@ -36,7 +38,8 @@ namespace FilePortal.SecureVault
 
             try
             {
-                throw new NotImplementedException();
+                var secret = await _secretClient.GetSecretAsync(secretName);
+                return secret.Value.Value;
             }
             catch (Exception ex)
             {
@@ -48,12 +51,13 @@ namespace FilePortal.SecureVault
         {
             if (string.IsNullOrEmpty(secretName) || string.IsNullOrEmpty(secretValue)) throw new InvalidOperationException("Wrong secret name or value was provided");
 
-            throw new NotImplementedException();
+            var result=await _secretClient.SetSecretAsync(secretName, secretValue);
+            return result.Value.Value;
         }
         public async Task DeleteSecret(string secretName)
         {
             if (string.IsNullOrEmpty(secretName)) return;
-            throw new NotImplementedException();
+            await _secretClient.StartDeleteSecretAsync(secretName);
         }
 
         #region private
