@@ -2,9 +2,11 @@
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
+using Azure.Storage;
 using FilePortal.SecureVault.Config;
 using Microsoft.Azure.KeyVault;
 using System;
+using System.Net;
 using System.Text;
 
 namespace FilePortal.SecureVault
@@ -16,15 +18,16 @@ namespace FilePortal.SecureVault
         Task<string> GetSecret(string secretName);
         Task<string> Decrypt(string cipherText);
         Task<string> Encrypt(string value);
+        ClientSideEncryptionOptions GetClientSideEncryptionOptions();
     }
 
     public class VaultService : IVaultService
     {
-       
+        public readonly string _keyName = "EncryptionDemo";
         private readonly string _vaultUrl;
         private readonly SecretClient _secretClient;
         private readonly KeyClient _keyClient;
-        private readonly string _keyName = "EncryptionDemo";
+
         public VaultService(VaultConfiguration config)
         {
           
@@ -75,7 +78,24 @@ namespace FilePortal.SecureVault
             var decrypted = await _keyClient.GetCryptographyClient(_keyName).DecryptAsync(EncryptionAlgorithm.RsaOaep, byteData);
             return Encoding.Unicode.GetString(decrypted.Plaintext);
         }
+         public ClientSideEncryptionOptions GetClientSideEncryptionOptions()
+        {
+            var key = _keyClient.GetKey(_keyName);
 
+            var keyResolver = new KeyResolver(GetCredentials());
+
+            var cryptoClient = new CryptographyClient(key.Value.Id, GetCredentials());
+
+            var encryptionOptions = new ClientSideEncryptionOptions(ClientSideEncryptionVersion.V2_0)
+            {
+                KeyEncryptionKey = cryptoClient,
+                KeyResolver = keyResolver,
+                KeyWrapAlgorithm = "RSA-OAEP"
+            };
+            return encryptionOptions;
+            
+           
+        }
         #region private
 
         private DefaultAzureCredential GetCredentials()

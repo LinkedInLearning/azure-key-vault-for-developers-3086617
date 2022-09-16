@@ -1,4 +1,7 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Core.Cryptography;
+using Azure.Storage;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using FilePortal.Dal;
 using FilePortal.Dal.Model;
@@ -17,6 +20,7 @@ namespace FilePortal.FileService.Services
         Task<IEnumerable<FileViewModel>> GetFiles(string userId);
         Task<IEnumerable<CustomSourceViewModel>> GetCustomSources(string userId);
         Task CreateCustomSource(NewCustomSource data, string userId);
+        Task<DownloadFileViewModel> DownloadFile(Guid fileId, string userId);
     }
 
     public class FileService : IFileService
@@ -86,6 +90,22 @@ namespace FilePortal.FileService.Services
             var url = blobClient.GenerateSasUri(sasBuilder);
             return url.AbsoluteUri;
         }
+        public async Task<DownloadFileViewModel> DownloadFile(Guid fileId, string userId)
+        {
+            var file = _db.PortalFiles.Include(f => f.ExternalFileSource).SingleOrDefault(f => f.Id == fileId && f.UserId == userId);
+            if (file == null) return null;
+
+
+            var container = await GetBlobContainer(file.ExternalFileSource);
+            BlobClient blobClient = container.GetBlobClient(file.FileName);
+            var memoryStream = new MemoryStream();
+            await blobClient.DownloadToAsync(memoryStream);
+            return new DownloadFileViewModel
+            {
+                FileData=memoryStream,
+                FileName=file.DisplayName
+            };
+        }
 
         public async Task<IEnumerable<CustomSourceViewModel>> GetCustomSources(string userId)
         {
@@ -120,10 +140,15 @@ namespace FilePortal.FileService.Services
 
         private async Task<BlobContainerClient> GetBlobContainer(ExternalFileSource externalSource = null)
         {
+            
+            BlobClientOptions options = new SpecializedBlobClientOptions() { 
+                ClientSideEncryption = _vault.GetClientSideEncryptionOptions()
+            };
+
             if (externalSource == null)
             {
                 // Create a BlobServiceClient object which will be used to create a container client
-                BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
+                BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString, options);
                 // Create the container and return a container client object
                 var blobContainer = blobServiceClient.GetBlobContainerClient(_containerName);
                 //create container if it doesn't exist
@@ -137,7 +162,7 @@ namespace FilePortal.FileService.Services
 
 
                 // Create a BlobServiceClient object which will be used to create a container client
-                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionStringDecrypted);
+                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionStringDecrypted, options);
                 // Create the container and return a container client object
                 var blobContainer = blobServiceClient.GetBlobContainerClient(externalSource.ContainerName);
                 //create container if it doesn't exist

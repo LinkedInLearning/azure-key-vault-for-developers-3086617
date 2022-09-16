@@ -23,11 +23,9 @@ namespace FilePortal.Web.Pages
         public async Task<IActionResult> OnGetAsync()
         {
 
-          
+            var file = await _fileService.DownloadFile(this.Id, CurrentUserId);
+            return File(file.FileData.ToArray(), "application/octet-stream", file.FileName);
 
-
-            var url =await _fileService.CreateDownloadLink(this.Id, CurrentUserId);
-            return Redirect(url);
         }
 
         [FromQuery(Name = "id")]
