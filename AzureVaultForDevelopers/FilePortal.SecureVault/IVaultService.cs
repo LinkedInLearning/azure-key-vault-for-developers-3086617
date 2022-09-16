@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
@@ -30,10 +31,30 @@ namespace FilePortal.SecureVault
 
         public VaultService(VaultConfiguration config)
         {
-          
+
             _vaultUrl = config.Endpoint;
-            _secretClient = new SecretClient(new Uri(_vaultUrl), GetCredentials());
-            _keyClient = new KeyClient(new Uri(_vaultUrl), GetCredentials());
+            SecretClientOptions secretOptions = new SecretClientOptions()
+            {
+                Retry =
+                       {
+                           Delay= TimeSpan.FromSeconds(2),
+                           MaxDelay = TimeSpan.FromSeconds(16),
+                           MaxRetries = 5,
+                           Mode = RetryMode.Exponential
+                        }
+              };
+            _secretClient = new SecretClient(new Uri(_vaultUrl), GetCredentials(), secretOptions);
+            KeyClientOptions keyOptions = new KeyClientOptions
+            {
+                Retry =
+                {
+                          Delay= TimeSpan.FromSeconds(2),
+                           MaxDelay = TimeSpan.FromSeconds(16),
+                           MaxRetries = 5,
+                           Mode = RetryMode.Exponential
+                }
+            };
+            _keyClient = new KeyClient(new Uri(_vaultUrl), GetCredentials(), keyOptions);
 
         }
 
@@ -57,7 +78,7 @@ namespace FilePortal.SecureVault
         {
             if (string.IsNullOrEmpty(secretName) || string.IsNullOrEmpty(secretValue)) throw new InvalidOperationException("Wrong secret name or value was provided");
 
-            var result=await _secretClient.SetSecretAsync(secretName, secretValue);
+            var result = await _secretClient.SetSecretAsync(secretName, secretValue);
             return result.Value.Value;
         }
         public async Task DeleteSecret(string secretName)
@@ -72,13 +93,13 @@ namespace FilePortal.SecureVault
             var encodedText = Convert.ToBase64String(encrypted.Ciphertext);
             return encodedText;
         }
-        public async Task<string> Decrypt( string cipherText)
+        public async Task<string> Decrypt(string cipherText)
         {
             var byteData = Convert.FromBase64String(cipherText);
             var decrypted = await _keyClient.GetCryptographyClient(_keyName).DecryptAsync(EncryptionAlgorithm.RsaOaep, byteData);
             return Encoding.Unicode.GetString(decrypted.Plaintext);
         }
-         public ClientSideEncryptionOptions GetClientSideEncryptionOptions()
+        public ClientSideEncryptionOptions GetClientSideEncryptionOptions()
         {
             var key = _keyClient.GetKey(_keyName);
 
@@ -93,8 +114,8 @@ namespace FilePortal.SecureVault
                 KeyWrapAlgorithm = "RSA-OAEP"
             };
             return encryptionOptions;
-            
-           
+
+
         }
         #region private
 
