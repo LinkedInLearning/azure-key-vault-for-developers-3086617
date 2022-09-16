@@ -134,6 +134,7 @@ namespace FilePortal.FileService.Services
             }
             else
             {
+               
                 var connectionString = await _vault.GetSecret(externalSource.ConnectionStringKey);
                 // Create a BlobServiceClient object which will be used to create a container client
                 BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);

@@ -1,7 +1,11 @@
 ﻿using Azure.Identity;
+using Azure.Security.KeyVault.Keys;
+using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
 using FilePortal.SecureVault.Config;
+using Microsoft.Azure.KeyVault;
 using System;
+using System.Text;
 
 namespace FilePortal.SecureVault
 {
@@ -10,7 +14,8 @@ namespace FilePortal.SecureVault
         Task<string> CreateSecret(string secretName, string secretValue);
         Task DeleteSecret(string secretName);
         Task<string> GetSecret(string secretName);
-
+        Task<string> Decrypt(string cipherText);
+        Task<string> Encrypt(string value);
     }
 
     public class VaultService : IVaultService
@@ -18,12 +23,15 @@ namespace FilePortal.SecureVault
        
         private readonly string _vaultUrl;
         private readonly SecretClient _secretClient;
+        private readonly KeyClient _keyClient;
+        private readonly string _keyName = "EncryptionDemo";
 
         public VaultService(VaultConfiguration config)
         {
           
             _vaultUrl = config.Endpoint;
             _secretClient = new SecretClient(new Uri(_vaultUrl), GetCredentials());
+            _keyClient = new KeyClient(new Uri(_vaultUrl), GetCredentials());
 
         }
 
@@ -54,6 +62,19 @@ namespace FilePortal.SecureVault
         {
             if (string.IsNullOrEmpty(secretName)) return;
             await _secretClient.StartDeleteSecretAsync(secretName);
+        }
+        public async Task<string> Encrypt(string value)
+        {
+            var byteData = Encoding.Unicode.GetBytes(value);
+            var encrypted = await _keyClient.GetCryptographyClient(_keyName).EncryptAsync(EncryptionAlgorithm.RsaOaep, byteData);
+            var encodedText = Convert.ToBase64String(encrypted.Ciphertext);
+            return encodedText;
+        }
+        public async Task<string> Decrypt( string cipherText)
+        {
+            var byteData = Convert.FromBase64String(cipherText);
+            var decrypted = await _keyClient.GetCryptographyClient(_keyName).DecryptAsync(EncryptionAlgorithm.RsaOaep, byteData);
+            return Encoding.Unicode.GetString(decrypted.Plaintext);
         }
 
         #region private
