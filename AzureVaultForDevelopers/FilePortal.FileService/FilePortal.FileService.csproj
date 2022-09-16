@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FilePortal.Dal\FilePortal.Dal.csproj" />
+    <ProjectReference Include="..\FilePortal.SecureVault\FilePortal.SecureVault.csproj" />
   </ItemGroup>
 
 </Project>

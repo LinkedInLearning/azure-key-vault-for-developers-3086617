@@ -19,7 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>  options.UseSqlSe
 //Add Storage
 var storageConfig = builder.Configuration.GetSection("StorageConfig").Get<StorageConfig>();
 builder.Services.RegisterFileServices(storageConfig);
-
+builder.Services.RegisterVaultServices(vaultConfig);
 
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

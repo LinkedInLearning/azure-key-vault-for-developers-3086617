@@ -5,6 +5,7 @@ using FilePortal.Dal.Model;
 using FilePortal.FileService.Config;
 using FilePortal.FileService.Model;
 using FilePortal.FileService.Model.Files;
+using FilePortal.SecureVault;
 using Microsoft.EntityFrameworkCore;
 
 namespace FilePortal.FileService.Services
@@ -23,11 +24,13 @@ namespace FilePortal.FileService.Services
         private readonly string _connectionString;
         private readonly string _containerName;
         private readonly ApplicationDbContext _db;
-        public FileService(ApplicationDbContext db, StorageConfig storageConfig)
+        private readonly IVaultService _vault;
+        public FileService(ApplicationDbContext db, StorageConfig storageConfig, IVaultService vault )
         {
             _connectionString = storageConfig.ConnectionString;
             _containerName = storageConfig.ContainerName;
             _db = db;
+            _vault = vault;
         }
 
 
@@ -97,15 +100,14 @@ namespace FilePortal.FileService.Services
         }
         public async Task CreateCustomSource (NewCustomSource data, string userId)
         {
-            var id = Guid.NewGuid();
            var newSource= _db.ExternalFileSource.Add(new ExternalFileSource
             {
-                Id = id,
+                Id = Guid.NewGuid(),
                 ContainerName = data.ContainerName,
                 Description = data.Description,
                 Name = data.Name,
                 UserId = userId,
-                ConnectionStringKey = "customstorageconnection:" + id
+                ConnectionStringKey = "ClientSecret-Storage-" + Guid.NewGuid()
             }).Entity;
             //TODO add key to vault
             throw new NotImplementedException();
