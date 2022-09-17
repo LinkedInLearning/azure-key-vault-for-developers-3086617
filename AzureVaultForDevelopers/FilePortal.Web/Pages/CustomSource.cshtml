@@ -1,0 +1,61 @@
+﻿@page
+@model CustomSourceModel
+@{
+    ViewData["Title"] = "Custom Sources";
+}
+
+
+<div class="row mt-2">
+
+    <div class="col-7">
+        <table class="table">
+           <thead>
+               <th>
+                   Name
+               </th>
+               <th>ContainerName</th>
+               <th>Description</th>
+           </thead>
+           <tbody>
+             
+                    @foreach (var item in Model.Sources)
+                {
+                    <tr>
+
+                        <td>@item.Name</td>
+                        <td>@item.ContainerName</td>
+                        <td>@item.Description</td>
+
+                    </tr>
+                    }
+               
+           </tbody>
+        </table>
+    </div>
+<div class="col-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Create New</h5>
+            <p class="card-text">
+                Add a new custom source
+
+                <form method="post">
+                    <label asp-for="NewCustomSource.Name" class="control-label"></label>
+
+                    <input class="form-control" required asp-for="NewCustomSource.Name" />
+
+                    <label asp-for="NewCustomSource.ContainerName" class="control-label"></label>
+                    <input class="form-control" required asp-for="NewCustomSource.ContainerName" />
+
+                    <label asp-for="NewCustomSource.StorageConnectionString" class="control-label"></label>
+                    <input class="form-control" required asp-for="NewCustomSource.StorageConnectionString" />
+
+                    <label asp-for="NewCustomSource.Description" class="control-label"></label>
+                    <input class="form-control" asp-for="NewCustomSource.Description" />
+                    <input type="submit" class="btn btn-primary mt-2" value="Save" />
+                </form>
+        </div>
+    </div>
+</div>
+</div>
+
