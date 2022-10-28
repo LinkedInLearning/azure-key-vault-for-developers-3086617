@@ -1,7 +1,10 @@
 # Azure Key Vault for Developers
 This is the repository for the LinkedIn Learning course Azure Key Vault for Developers. The full course is available from [LinkedIn Learning][lil-course-url].
 
-_See the readme file in the main branch for updated instructions and information._
+![Azure Key Vault for Developers][lil-thumbnail-url] 
+
+Do you need to learn how to manage sensitive information for your applications and services? In this course, instructor Nertil Poci shows you how to secure sensitive information with Azure Key Vault. Nertil explains what Azure Key Vault does, then goes over creating Key Vaults, setting up your project dependencies, and securely accessing information stored in Key Vaults. He covers a variety of ways to store application secrets in Azure Key Vault, including working with Azure Key Vault, binding Key Vault secrets in .NET applications, creating secrets using the Key Vault API, and much more.  Nertil shows you how to use Azure Key Vault to generate and secure cryptographic keys, then dives into creating and managing certificates in Azure Key Vault. Plus, he highlights best practices for monitoring Azure Key Vault, including adding throttling to your API calls, caching Key Vault API calls, enabling logging, and setting up alerts.
+
 ## Instructions
 This repository has branches for each of the videos in the course. You can use the branch pop up menu in github to switch to a specific branch and take a look at the course at that stage, or you can add `/tree/BRANCH_NAME` to the URL to go to the branch you want to access.
 
@@ -27,8 +30,15 @@ To resolve this issue:
 3. [Course-specific instructions]
 
 
-[0]: # (Replace these placeholder URLs with actual course URLs)
+### Instructor
 
-[lil-course-url]: https://www.linkedin.com/learning/
-[lil-thumbnail-url]: http://
+Nertil Poci 
+                            
+Software Developer
 
+                            
+
+Check out my other courses on [LinkedIn Learning](https://www.linkedin.com/learning/instructors/nertil-poci).
+
+[lil-course-url]: https://www.linkedin.com/learning/azure-key-vault-for-developers?dApp=59033956
+[lil-thumbnail-url]: https://cdn.lynda.com/course/3086617/3086617-1666634981132-16x9.jpg
